@@ -114,7 +114,7 @@ type Stmt interface {
 // Statement cases (incomplete)
 
 type Seq [2]Stmt            // Command Sequence
-type Decl struct {
+type Decl struct {          // Variable declaration
     lhs string
     rhs Exp
 }
@@ -131,9 +131,14 @@ type Assign struct {        // Variable assignment
 
 // Statement cases Additional --ToDo
 
-// Variable declaration
-// While
-// Print
+type While struct {         // While
+    cond Exp
+    doStmt Stmt
+}
+
+type Print struct {         // Print
+    exp Exp
+}
 
 // Expression cases (incomplete)
 
@@ -145,12 +150,12 @@ type And [2]Exp             // Conjunction
 type Or [2]Exp              // Disjunction
 type Var string             // Variable
 
-// Expression Additional --ToDo
+// Expression Additional --ToDo => Check if Ok
 
-// Negation
-// Equality test
-// Lesser test
-// Grouping of expressions
+type Neg [1]Exp             // Negation
+type Equal [2]Exp           // Equality test
+type Lesser [2]Exp          // Lesser test
+type Group [1]Exp           // Grouping of expressions
 
 /////////////////////////
 // Stmt instances
@@ -164,6 +169,31 @@ func (stmt Seq) pretty() string {
 func (decl Decl) pretty() string {
     return decl.lhs + " := " + decl.rhs.pretty()
 }
+
+// pretty print Additional --ToDo
+
+func (assign Assign) pretty() string{
+    return assign.lhs + " = " + assign.rhs.pretty()
+}
+
+// Maybe implement this. Not clear if neccessary
+/*
+func (ite IfThenElse) pretty() string{
+
+}
+*/
+
+/*
+func (whl While) pretty() string{
+    
+}
+*/
+
+/*
+func (prnt Print) pretty() string{
+    
+}
+*/
 
 // eval
 
@@ -196,6 +226,19 @@ func (decl Decl) eval(s ValState) {
     s[x] = v
 }
 
+// eval Additional --ToDo => Check if Ok
+
+func (whl While) eval(s ValState) {
+    v := whl.cond.eval(s)
+    if v.flag == ValueBool {
+        whl.doStmt.eval(s)
+    }
+}
+
+func (prnt Print) eval(s ValState) {
+    v := prnt.exp.eval(s)
+}
+
 // type check
 
 func (stmt Seq) check(t TyState) bool {
@@ -221,6 +264,7 @@ func (a Assign) check(t TyState) bool {
         return t[x] == a.rhs.infer(t)
 }
 
+// type check Additional --ToDo => implement
 
 /////////////////////////
 // Exp instances
@@ -292,6 +336,53 @@ func (e Or) pretty() string {
     return x
 }
 
+// Exp pretty print Additional --ToDo => Check if OK
+
+func (e Neg) pretty() string {
+    
+    var x string
+    x = "("
+    x += "!"
+    x += e[0].pretty()
+    x += ")"
+    
+    return x
+}
+
+func (e Equal) pretty() string {
+    
+    var x string
+    x = "("
+    x += e[0].pretty()
+    x += " == "
+    x += e[1].pretty()
+    x += ")"
+    
+    return x
+}
+
+func (e Lesser) pretty() string {
+    
+    var x string
+    x = "("
+    x += e[0].pretty()
+    x += " < "
+    x += e[1].pretty()
+    x += ")"
+    
+    return x
+}
+
+func (e Group) pretty() string {
+    var x string
+    x = "("
+    x += e[0].pretty()
+    x += ")"
+    
+    return x
+}
+
+
 // Evaluator
 
 func (x Bool) eval(s ValState) Val {
@@ -343,6 +434,59 @@ func (e Or) eval(s ValState) Val {
     }
     return mkUndefined()
 }
+
+// Evaluator Addition --ToDo => Check if OK
+
+func (e Neg) evals(s ValState) Val {
+   n1 := e[0].eval(s)
+   switch {
+    case n1.flag == ValueBool && n1.valB == true:
+        return mkBool(false)
+    }
+    case n1.flag == ValueBool && n1.valB == false:
+        return mkBool(true)
+    }
+    return mkUndefined()
+}
+
+func (e Equal) evals(s ValState) Val {
+    n1 := e[0].eval(s)
+    n2 := e[1].eval(s)
+    
+    switch {
+        case n1.flag == ValueBool && n2.flag == ValueBool:
+            if n1 == n2 {
+                return mkBool(true)
+            }else{
+                return mkBool(false)
+            }
+        
+        case n1.flag == ValueInt && n2.flag == ValueInt:
+            if n1 == n2 {
+                return mkBool(true)
+            }else{
+                return mkBool(false)
+            }
+    }
+    return mkUndefined()
+}
+
+func (e Lesser) evals(s ValState) Val {
+    n1 := e[0].eval(s)
+    n2 := e[1].eval(s)
+    
+    if n1.flag == ValueInt && n2.flag == ValueInt {
+        return mkBool(n1 < n2)
+    }
+    return mkUndefined()
+}
+
+// Maybe implement Grouping
+/*
+func (e Group) evals(s Valstate) Val {
+    
+}
+*/
 
 // Type inferencer/checker
 
@@ -401,6 +545,48 @@ func (e Or) infer(t TyState) Type {
     return TyIllTyped
 }
 
+// Type inferencer/checker Addition --ToDo => check if OK
+
+func (e Neg) infer(t TyState) Type {
+    t1 := e[0].infer(t)
+    if t1 == TyBool {
+        return TyBool
+    }
+    if t1 == TyInt {
+        return TyInt
+    }
+    return TyIllTyped
+    
+
+func (e Equal) infer(t TyState) Type {
+    t1 := e[0].infer(t)
+    t2 := e[1].infer(t)
+    if t1 == TyBool && t2 == TyBool {
+        return TyBool
+    }
+    if t1 == TyInt && t2 == TyInt {
+        return TyInt
+    }
+    return TyIllTyped
+}
+
+func (e Lesser) infer(t TyState) Type {
+    t1 := e[0].infer(t)
+    t2 := e[1].infer(t)
+    if t1 == TyInt && t2 == TyInt {
+        return TyInt
+    }
+    return TyIllTyped
+}
+
+// Maybe implement Grouping
+/*
+func (e Group) infer(t TyState) Type{
+
+} 
+*/
+
+
 // Helper functions to build ASTs by hand
 
 func number(x int) Exp {
@@ -431,6 +617,13 @@ func and(x, y Exp) Exp {
 
 func or(x, y Exp) Exp {
     return (Or)([2]Exp{x, y})
+}
+
+// Additional Helper functions --ToDo => impelemnt
+
+// Maybe not neccessary!?
+func neg(x Exp) Exp {
+    return (Neg)([1]Exp{x})
 }
 
 // Examples
