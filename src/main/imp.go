@@ -269,7 +269,29 @@ func (a Assign) check(t TyState) bool {
 // type check Additional --ToDo => implement
 
 
+func (whl While) check(t TyState) bool {
+    ty := whl.cond.infer(t)
+    if ty == TyIllTyped || ty == TyInt {
+        return false
+    }
+    return true
+}
 
+func (ite IfThenElse) check(t TyState) bool {
+    ty := ite.cond.infer(t)
+    if ty == TyIllTyped || ty == TyInt {
+        return false
+    }
+    return true
+}
+
+func (prnt Print) check(t TyState) bool {
+    ty := prnt.exp.infer(t)
+    if ty == TyIllTyped {
+        return false
+    }
+    return true
+}
 
 /////////////////////////
 // Exp instances
@@ -446,7 +468,6 @@ func (e Neg) eval(s ValState) Val {
 	switch {
 	case n1.flag == ValueBool && n1.valB == true:
 		return mkBool(false)
-	// } Node: set comment.
 	case n1.flag == ValueBool && n1.valB == false:
 		return mkBool(true)
 	}
@@ -583,13 +604,6 @@ func (e Lesser) infer(t TyState) Type {
 	}
 	return TyIllTyped
 }
-
-// Maybe implement Grouping
-/*
-func (e Group) infer(t TyState) Type{
-
-}
-*/
 
 // Helper functions to build ASTs by hand
 
