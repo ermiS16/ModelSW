@@ -502,12 +502,6 @@ func (e Lesser) eval(s ValState) Val {
 	return mkUndefined()
 }
 
-// Maybe implement Grouping
-/*
-func (e Group) eval(s Valstate) Val {
-
-}
-*/
 
 // Type inferencer/checker
 
@@ -573,9 +567,6 @@ func (e Neg) infer(t TyState) Type {
 	if t1 == TyBool {
 		return TyBool
 	}
-	if t1 == TyInt {
-		return TyInt
-	}
 	return TyIllTyped
 
 } // Set curly bracket to close the function
@@ -587,7 +578,7 @@ func (e Equal) infer(t TyState) Type {
 		return TyBool
 	}
 	if t1 == TyInt && t2 == TyInt {
-		return TyInt
+		return TyBool
 	}
 	return TyIllTyped
 }
@@ -596,7 +587,7 @@ func (e Lesser) infer(t TyState) Type {
 	t1 := e[0].infer(t)
 	t2 := e[1].infer(t)
 	if t1 == TyInt && t2 == TyInt {
-		return TyInt
+		return TyBool
 	}
 	return TyIllTyped
 }
@@ -678,10 +669,6 @@ func ex3() {
 	run(ast)
 }
 
-func test() {
-	fmt.Printf("true" + "false")
-}
-
 func testNeg1() {
 	fmt.Print("Test neg 1:")
 	ast := neg(boolean(true))
@@ -728,12 +715,11 @@ func main() {
 	// ex1()
 	//ex2()
 	//ex3()
-	//test()
 	// testNeg1()
 	// testNeg3()
 	// testNeg4()
 	// testNeg2()
 	testLesser1()
-	testLesser2()
-	testLesser3()
+	// testLesser2()
+	// tetLesser3()
 }
