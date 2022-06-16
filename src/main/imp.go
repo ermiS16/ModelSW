@@ -438,7 +438,7 @@ func (e Or) eval(s ValState) Val {
 
 // Evaluator Addition --ToDo => Check if OK
 
-func (e Neg) evals(s ValState) Val {
+func (e Neg) eval(s ValState) Val {
 	n1 := e[0].eval(s)
 	switch {
 	case n1.flag == ValueBool && n1.valB == true:
@@ -450,7 +450,7 @@ func (e Neg) evals(s ValState) Val {
 	return mkUndefined()
 }
 
-func (e Equal) evals(s ValState) Val {
+func (e Equal) eval(s ValState) Val {
 	n1 := e[0].eval(s)
 	n2 := e[1].eval(s)
 
@@ -472,12 +472,12 @@ func (e Equal) evals(s ValState) Val {
 	return mkUndefined()
 }
 
-func (e Lesser) evals(s ValState) Val {
+func (e Lesser) eval(s ValState) Val {
 	n1 := e[0].eval(s)
 	n2 := e[1].eval(s)
 
 	if n1.flag == ValueInt && n2.flag == ValueInt {
-		return mkBool(n1 < n2)
+		return mkBool(n1.valI < n2.valI)
 	}
 	return mkUndefined()
 }
@@ -657,6 +657,8 @@ func ex3() {
 	run(ast)
 }
 
+
+
 func test() {
 	fmt.Printf("true" + "false")
 }
@@ -664,7 +666,7 @@ func test() {
 func main() {
 
 	fmt.Printf("\n")
-
+    
 	ex1()
 	//ex2()
 	//ex3()
