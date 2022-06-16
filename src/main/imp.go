@@ -1,7 +1,9 @@
 package main
 
-import "fmt"
-import "strconv"
+import (
+	"fmt"
+	"strconv"
+)
 
 // Simple imperative language
 
@@ -34,38 +36,38 @@ exp ::= 0 | 1 | -1 | ...     -- Integers
 type Kind int
 
 const (
-    ValueInt  Kind = 0
-    ValueBool Kind = 1
-    Undefined Kind = 2
+	ValueInt  Kind = 0
+	ValueBool Kind = 1
+	Undefined Kind = 2
 )
 
 type Val struct {
-    flag Kind
-    valI int
-    valB bool
+	flag Kind
+	valI int
+	valB bool
 }
 
 func mkInt(x int) Val {
-    return Val{flag: ValueInt, valI: x}
+	return Val{flag: ValueInt, valI: x}
 }
 func mkBool(x bool) Val {
-    return Val{flag: ValueBool, valB: x}
+	return Val{flag: ValueBool, valB: x}
 }
 func mkUndefined() Val {
-    return Val{flag: Undefined}
+	return Val{flag: Undefined}
 }
 
 func showVal(v Val) string {
-    var s string
-    switch {
-    case v.flag == ValueInt:
-        s = Num(v.valI).pretty()
-    case v.flag == ValueBool:
-        s = Bool(v.valB).pretty()
-    case v.flag == Undefined:
-        s = "Undefined"
-    }
-    return s
+	var s string
+	switch {
+	case v.flag == ValueInt:
+		s = Num(v.valI).pretty()
+	case v.flag == ValueBool:
+		s = Bool(v.valB).pretty()
+	case v.flag == Undefined:
+		s = "Undefined"
+	}
+	return s
 }
 
 // Types
@@ -73,22 +75,22 @@ func showVal(v Val) string {
 type Type int
 
 const (
-    TyIllTyped Type = 0
-    TyInt      Type = 1
-    TyBool     Type = 2
+	TyIllTyped Type = 0
+	TyInt      Type = 1
+	TyBool     Type = 2
 )
 
 func showType(t Type) string {
-    var s string
-    switch {
-    case t == TyInt:
-        s = "Int"
-    case t == TyBool:
-        s = "Bool"
-    case t == TyIllTyped:
-        s = "Illtyped"
-    }
-    return s
+	var s string
+	switch {
+	case t == TyInt:
+		s = "Int"
+	case t == TyBool:
+		s = "Bool"
+	case t == TyIllTyped:
+		s = "Illtyped"
+	}
+	return s
 }
 
 // Value State is a mapping from variable names to values
@@ -100,62 +102,62 @@ type TyState map[string]Type
 // Interface
 
 type Exp interface {
-    pretty() string
-    eval(s ValState) Val
-    infer(t TyState) Type
+	pretty() string
+	eval(s ValState) Val
+	infer(t TyState) Type
 }
 
 type Stmt interface {
-    pretty() string
-    eval(s ValState)
-    check(t TyState) bool
+	pretty() string
+	eval(s ValState)
+	check(t TyState) bool
 }
 
 // Statement cases (incomplete)
 
-type Seq [2]Stmt            // Command Sequence
-type Decl struct {          // Variable declaration
-    lhs string
-    rhs Exp
+type Seq [2]Stmt   // Command Sequence
+type Decl struct { // Variable declaration
+	lhs string
+	rhs Exp
 }
-type IfThenElse struct {    // If-then-else
-    cond     Exp
-    thenStmt Stmt
-    elseStmt Stmt
+type IfThenElse struct { // If-then-else
+	cond     Exp
+	thenStmt Stmt
+	elseStmt Stmt
 }
 
-type Assign struct {        // Variable assignment
-    lhs string
-    rhs Exp
+type Assign struct { // Variable assignment
+	lhs string
+	rhs Exp
 }
 
 // Statement cases Additional --ToDo
 
-type While struct {         // While
-    cond Exp
-    doStmt Stmt
+type While struct { // While
+	cond   Exp
+	doStmt Stmt
 }
 
-type Print struct {         // Print
-    exp Exp
+type Print struct { // Print
+	exp Exp
 }
 
 // Expression cases (incomplete)
 
-type Bool bool              // Boolean
-type Num int                // Integer
-type Mult [2]Exp            // Multiplication
-type Plus [2]Exp            // Addition
-type And [2]Exp             // Conjunction
-type Or [2]Exp              // Disjunction
-type Var string             // Variable
+type Bool bool   // Boolean
+type Num int     // Integer
+type Mult [2]Exp // Multiplication
+type Plus [2]Exp // Addition
+type And [2]Exp  // Conjunction
+type Or [2]Exp   // Disjunction
+type Var string  // Variable
 
 // Expression Additional --ToDo => Check if Ok
 
-type Neg [1]Exp             // Negation
-type Equal [2]Exp           // Equality test
-type Lesser [2]Exp          // Lesser test
-type Group [1]Exp           // Grouping of expressions
+type Neg [1]Exp    // Negation
+type Equal [2]Exp  // Equality test
+type Lesser [2]Exp // Lesser test
+type Group [1]Exp  // Grouping of expressions
 
 /////////////////////////
 // Stmt instances
@@ -163,17 +165,17 @@ type Group [1]Exp           // Grouping of expressions
 // pretty print
 
 func (stmt Seq) pretty() string {
-    return stmt[0].pretty() + "; " + stmt[1].pretty()
+	return stmt[0].pretty() + "; " + stmt[1].pretty()
 }
 
 func (decl Decl) pretty() string {
-    return decl.lhs + " := " + decl.rhs.pretty()
+	return decl.lhs + " := " + decl.rhs.pretty()
 }
 
 // pretty print Additional --ToDo
 
-func (assign Assign) pretty() string{
-    return assign.lhs + " = " + assign.rhs.pretty()
+func (assign Assign) pretty() string {
+	return assign.lhs + " = " + assign.rhs.pretty()
 }
 
 // Maybe implement this. Not clear if neccessary
@@ -185,83 +187,83 @@ func (ite IfThenElse) pretty() string{
 
 /*
 func (whl While) pretty() string{
-    
+
 }
 */
 
 /*
 func (prnt Print) pretty() string{
-    
+
 }
 */
 
 // eval
 
 func (stmt Seq) eval(s ValState) {
-    stmt[0].eval(s)
-    stmt[1].eval(s)
+	stmt[0].eval(s)
+	stmt[1].eval(s)
 }
 
 func (ite IfThenElse) eval(s ValState) {
-    v := ite.cond.eval(s)
-    if v.flag == ValueBool {
-        switch {
-        case v.valB:
-            ite.thenStmt.eval(s)
-        case !v.valB:
-            ite.elseStmt.eval(s)
-        }
+	v := ite.cond.eval(s)
+	if v.flag == ValueBool {
+		switch {
+		case v.valB:
+			ite.thenStmt.eval(s)
+		case !v.valB:
+			ite.elseStmt.eval(s)
+		}
 
-    } else {
-        fmt.Printf("if-then-else eval fail")
-    }
+	} else {
+		fmt.Printf("if-then-else eval fail")
+	}
 
 }
 
 // Maps are represented via points.
 // Hence, maps are passed by "reference" and the update is visible for the caller as well.
 func (decl Decl) eval(s ValState) {
-    v := decl.rhs.eval(s)
-    x := (string)(decl.lhs)
-    s[x] = v
+	v := decl.rhs.eval(s)
+	x := (string)(decl.lhs)
+	s[x] = v
 }
 
 // eval Additional --ToDo => Check if Ok
 
 func (whl While) eval(s ValState) {
-    v := whl.cond.eval(s)
-    if v.flag == ValueBool {
-        whl.doStmt.eval(s)
-    }
+	v := whl.cond.eval(s)
+	if v.flag == ValueBool {
+		whl.doStmt.eval(s)
+	}
 }
 
 func (prnt Print) eval(s ValState) {
-    v := prnt.exp.eval(s)
+	v := prnt.exp.eval(s)
 }
 
 // type check
 
 func (stmt Seq) check(t TyState) bool {
-    if !stmt[0].check(t) {
-        return false
-    }
-    return stmt[1].check(t)
+	if !stmt[0].check(t) {
+		return false
+	}
+	return stmt[1].check(t)
 }
 
 func (decl Decl) check(t TyState) bool {
-    ty := decl.rhs.infer(t)
-    if ty == TyIllTyped {
-        return false
-    }
+	ty := decl.rhs.infer(t)
+	if ty == TyIllTyped {
+		return false
+	}
 
-    x := (string)(decl.lhs)
-    t[x] = ty
-    return true
+	x := (string)(decl.lhs)
+	t[x] = ty
+	return true
 }
 
 func (a Assign) check(t TyState) bool {
-        x := (string)(a.lhs)
-        return t[x] == a.rhs.infer(t)
+	x := (string)(a.lhs)
+	return t[x] == a.rhs.infer(t)
 }
 
 // type check Additional --ToDo => implement
@@ -272,400 +274,399 @@ func (a Assign) check(t TyState) bool {
 // pretty print
 
 func (x Var) pretty() string {
-    return (string)(x)
+	return (string)(x)
 }
 
 func (x Bool) pretty() string {
-    if x {
-        return "true"
-    } else {
-        return "false"
-    }
+	if x {
+		return "true"
+	} else {
+		return "false"
+	}
 
 }
 
 func (x Num) pretty() string {
-    return strconv.Itoa(int(x))
+	return strconv.Itoa(int(x))
 }
 
 func (e Mult) pretty() string {
 
-    var x string
-    x = "("
-    x += e[0].pretty()
-    x += "*"
-    x += e[1].pretty()
-    x += ")"
+	var x string
+	x = "("
+	x += e[0].pretty()
+	x += "*"
+	x += e[1].pretty()
+	x += ")"
 
-    return x
+	return x
 }
 
 func (e Plus) pretty() string {
 
-    var x string
-    x = "("
-    x += e[0].pretty()
-    x += "+"
-    x += e[1].pretty()
-    x += ")"
+	var x string
+	x = "("
+	x += e[0].pretty()
+	x += "+"
+	x += e[1].pretty()
+	x += ")"
 
-    return x
+	return x
 }
 
 func (e And) pretty() string {
 
-    var x string
-    x = "("
-    x += e[0].pretty()
-    x += "&&"
-    x += e[1].pretty()
-    x += ")"
+	var x string
+	x = "("
+	x += e[0].pretty()
+	x += "&&"
+	x += e[1].pretty()
+	x += ")"
 
-    return x
+	return x
 }
 
 func (e Or) pretty() string {
 
-    var x string
-    x = "("
-    x += e[0].pretty()
-    x += "||"
-    x += e[1].pretty()
-    x += ")"
+	var x string
+	x = "("
+	x += e[0].pretty()
+	x += "||"
+	x += e[1].pretty()
+	x += ")"
 
-    return x
+	return x
 }
 
 // Exp pretty print Additional --ToDo => Check if OK
 
 func (e Neg) pretty() string {
-    
-    var x string
-    x = "("
-    x += "!"
-    x += e[0].pretty()
-    x += ")"
-    
-    return x
+
+	var x string
+	x = "("
+	x += "!"
+	x += e[0].pretty()
+	x += ")"
+
+	return x
 }
 
 func (e Equal) pretty() string {
-    
-    var x string
-    x = "("
-    x += e[0].pretty()
-    x += " == "
-    x += e[1].pretty()
-    x += ")"
-    
-    return x
+
+	var x string
+	x = "("
+	x += e[0].pretty()
+	x += " == "
+	x += e[1].pretty()
+	x += ")"
+
+	return x
 }
 
 func (e Lesser) pretty() string {
-    
-    var x string
-    x = "("
-    x += e[0].pretty()
-    x += " < "
-    x += e[1].pretty()
-    x += ")"
-    
-    return x
+
+	var x string
+	x = "("
+	x += e[0].pretty()
+	x += " < "
+	x += e[1].pretty()
+	x += ")"
+
+	return x
 }
 
 func (e Group) pretty() string {
-    var x string
-    x = "("
-    x += e[0].pretty()
-    x += ")"
-    
-    return x
-}
+	var x string
+	x = "("
+	x += e[0].pretty()
+	x += ")"
 
+	return x
+}
 
 // Evaluator
 
 func (x Bool) eval(s ValState) Val {
-    return mkBool((bool)(x))
+	return mkBool((bool)(x))
 }
 
 func (x Num) eval(s ValState) Val {
-    return mkInt((int)(x))
+	return mkInt((int)(x))
 }
 
 func (e Mult) eval(s ValState) Val {
-    n1 := e[0].eval(s)
-    n2 := e[1].eval(s)
-    if n1.flag == ValueInt && n2.flag == ValueInt {
-        return mkInt(n1.valI * n2.valI)
-    }
-    return mkUndefined()
+	n1 := e[0].eval(s)
+	n2 := e[1].eval(s)
+	if n1.flag == ValueInt && n2.flag == ValueInt {
+		return mkInt(n1.valI * n2.valI)
+	}
+	return mkUndefined()
 }
 
 func (e Plus) eval(s ValState) Val {
-    n1 := e[0].eval(s)
-    n2 := e[1].eval(s)
-    if n1.flag == ValueInt && n2.flag == ValueInt {
-        return mkInt(n1.valI + n2.valI)
-    }
-    return mkUndefined()
+	n1 := e[0].eval(s)
+	n2 := e[1].eval(s)
+	if n1.flag == ValueInt && n2.flag == ValueInt {
+		return mkInt(n1.valI + n2.valI)
+	}
+	return mkUndefined()
 }
 
 func (e And) eval(s ValState) Val {
-    b1 := e[0].eval(s)
-    b2 := e[1].eval(s)
-    switch {
-    case b1.flag == ValueBool && b1.valB == false:
-        return mkBool(false)
-    case b1.flag == ValueBool && b2.flag == ValueBool:
-        return mkBool(b1.valB && b2.valB)
-    }
-    return mkUndefined()
+	b1 := e[0].eval(s)
+	b2 := e[1].eval(s)
+	switch {
+	case b1.flag == ValueBool && b1.valB == false:
+		return mkBool(false)
+	case b1.flag == ValueBool && b2.flag == ValueBool:
+		return mkBool(b1.valB && b2.valB)
+	}
+	return mkUndefined()
 }
 
 func (e Or) eval(s ValState) Val {
-    b1 := e[0].eval(s)
-    b2 := e[1].eval(s)
-    switch {
-    case b1.flag == ValueBool && b1.valB == true:
-        return mkBool(true)
-    case b1.flag == ValueBool && b2.flag == ValueBool:
-        return mkBool(b1.valB || b2.valB)
-    }
-    return mkUndefined()
+	b1 := e[0].eval(s)
+	b2 := e[1].eval(s)
+	switch {
+	case b1.flag == ValueBool && b1.valB == true:
+		return mkBool(true)
+	case b1.flag == ValueBool && b2.flag == ValueBool:
+		return mkBool(b1.valB || b2.valB)
+	}
+	return mkUndefined()
 }
 
 // Evaluator Addition --ToDo => Check if OK
 
 func (e Neg) evals(s ValState) Val {
-   n1 := e[0].eval(s)
-   switch {
-    case n1.flag == ValueBool && n1.valB == true:
-        return mkBool(false)
-    }
-    case n1.flag == ValueBool && n1.valB == false:
-        return mkBool(true)
-    }
-    return mkUndefined()
+	n1 := e[0].eval(s)
+	switch {
+	case n1.flag == ValueBool && n1.valB == true:
+		return mkBool(false)
+	// } Node: set comment.
+	case n1.flag == ValueBool && n1.valB == false:
+		return mkBool(true)
+	}
+	return mkUndefined()
 }
 
 func (e Equal) evals(s ValState) Val {
-    n1 := e[0].eval(s)
-    n2 := e[1].eval(s)
-    
-    switch {
-        case n1.flag == ValueBool && n2.flag == ValueBool:
-            if n1 == n2 {
-                return mkBool(true)
-            }else{
-                return mkBool(false)
-            }
-        
-        case n1.flag == ValueInt && n2.flag == ValueInt:
-            if n1 == n2 {
-                return mkBool(true)
-            }else{
-                return mkBool(false)
-            }
-    }
-    return mkUndefined()
+	n1 := e[0].eval(s)
+	n2 := e[1].eval(s)
+
+	switch {
+	case n1.flag == ValueBool && n2.flag == ValueBool:
+		if n1 == n2 {
+			return mkBool(true)
+		} else {
+			return mkBool(false)
+		}
+
+	case n1.flag == ValueInt && n2.flag == ValueInt:
+		if n1 == n2 {
+			return mkBool(true)
+		} else {
+			return mkBool(false)
+		}
+	}
+	return mkUndefined()
 }
 
 func (e Lesser) evals(s ValState) Val {
-    n1 := e[0].eval(s)
-    n2 := e[1].eval(s)
-    
-    if n1.flag == ValueInt && n2.flag == ValueInt {
-        return mkBool(n1 < n2)
-    }
-    return mkUndefined()
+	n1 := e[0].eval(s)
+	n2 := e[1].eval(s)
+
+	if n1.flag == ValueInt && n2.flag == ValueInt {
+		return mkBool(n1 < n2)
+	}
+	return mkUndefined()
 }
 
 // Maybe implement Grouping
 /*
 func (e Group) evals(s Valstate) Val {
-    
+
 }
 */
 
 // Type inferencer/checker
 
 func (x Var) infer(t TyState) Type {
-    y := (string)(x)
-    ty, ok := t[y]
-    if ok {
-        return ty
-    } else {
-        return TyIllTyped // variable does not exist yields illtyped
-    }
+	y := (string)(x)
+	ty, ok := t[y]
+	if ok {
+		return ty
+	} else {
+		return TyIllTyped // variable does not exist yields illtyped
+	}
 
 }
 
 func (x Bool) infer(t TyState) Type {
-    return TyBool
+	return TyBool
 }
 
 func (x Num) infer(t TyState) Type {
-    return TyInt
+	return TyInt
 }
 
 func (e Mult) infer(t TyState) Type {
-    t1 := e[0].infer(t)
-    t2 := e[1].infer(t)
-    if t1 == TyInt && t2 == TyInt {
-        return TyInt
-    }
-    return TyIllTyped
+	t1 := e[0].infer(t)
+	t2 := e[1].infer(t)
+	if t1 == TyInt && t2 == TyInt {
+		return TyInt
+	}
+	return TyIllTyped
 }
 
 func (e Plus) infer(t TyState) Type {
-    t1 := e[0].infer(t)
-    t2 := e[1].infer(t)
-    if t1 == TyInt && t2 == TyInt {
-        return TyInt
-    }
-    return TyIllTyped
+	t1 := e[0].infer(t)
+	t2 := e[1].infer(t)
+	if t1 == TyInt && t2 == TyInt {
+		return TyInt
+	}
+	return TyIllTyped
 }
 
 func (e And) infer(t TyState) Type {
-    t1 := e[0].infer(t)
-    t2 := e[1].infer(t)
-    if t1 == TyBool && t2 == TyBool {
-        return TyBool
-    }
-    return TyIllTyped
+	t1 := e[0].infer(t)
+	t2 := e[1].infer(t)
+	if t1 == TyBool && t2 == TyBool {
+		return TyBool
+	}
+	return TyIllTyped
 }
 
 func (e Or) infer(t TyState) Type {
-    t1 := e[0].infer(t)
-    t2 := e[1].infer(t)
-    if t1 == TyBool && t2 == TyBool {
-        return TyBool
-    }
-    return TyIllTyped
+	t1 := e[0].infer(t)
+	t2 := e[1].infer(t)
+	if t1 == TyBool && t2 == TyBool {
+		return TyBool
+	}
+	return TyIllTyped
 }
 
 // Type inferencer/checker Addition --ToDo => check if OK
 
 func (e Neg) infer(t TyState) Type {
-    t1 := e[0].infer(t)
-    if t1 == TyBool {
-        return TyBool
-    }
-    if t1 == TyInt {
-        return TyInt
-    }
-    return TyIllTyped
-    
+	t1 := e[0].infer(t)
+	if t1 == TyBool {
+		return TyBool
+	}
+	if t1 == TyInt {
+		return TyInt
+	}
+	return TyIllTyped
+
+} // Set curly bracket to close the function
 
 func (e Equal) infer(t TyState) Type {
-    t1 := e[0].infer(t)
-    t2 := e[1].infer(t)
-    if t1 == TyBool && t2 == TyBool {
-        return TyBool
-    }
-    if t1 == TyInt && t2 == TyInt {
-        return TyInt
-    }
-    return TyIllTyped
+	t1 := e[0].infer(t)
+	t2 := e[1].infer(t)
+	if t1 == TyBool && t2 == TyBool {
+		return TyBool
+	}
+	if t1 == TyInt && t2 == TyInt {
+		return TyInt
+	}
+	return TyIllTyped
 }
 
 func (e Lesser) infer(t TyState) Type {
-    t1 := e[0].infer(t)
-    t2 := e[1].infer(t)
-    if t1 == TyInt && t2 == TyInt {
-        return TyInt
-    }
-    return TyIllTyped
+	t1 := e[0].infer(t)
+	t2 := e[1].infer(t)
+	if t1 == TyInt && t2 == TyInt {
+		return TyInt
+	}
+	return TyIllTyped
 }
 
 // Maybe implement Grouping
 /*
 func (e Group) infer(t TyState) Type{
 
-} 
+}
 */
-
 
 // Helper functions to build ASTs by hand
 
 func number(x int) Exp {
-    return Num(x)
+	return Num(x)
 }
 
 func boolean(x bool) Exp {
-    return Bool(x)
+	return Bool(x)
 }
 
 func plus(x, y Exp) Exp {
-    return (Plus)([2]Exp{x, y})
+	return (Plus)([2]Exp{x, y})
 
-    // The type Plus is defined as the two element array consisting of Exp elements.
-    // Plus and [2]Exp are isomorphic but different types.
-    // We first build the AST value [2]Exp{x,y}.
-    // Then cast this value (of type [2]Exp) into a value of type Plus.
+	// The type Plus is defined as the two element array consisting of Exp elements.
+	// Plus and [2]Exp are isomorphic but different types.
+	// We first build the AST value [2]Exp{x,y}.
+	// Then cast this value (of type [2]Exp) into a value of type Plus.
 
 }
 
 func mult(x, y Exp) Exp {
-    return (Mult)([2]Exp{x, y})
+	return (Mult)([2]Exp{x, y})
 }
 
 func and(x, y Exp) Exp {
-    return (And)([2]Exp{x, y})
+	return (And)([2]Exp{x, y})
 }
 
 func or(x, y Exp) Exp {
-    return (Or)([2]Exp{x, y})
+	return (Or)([2]Exp{x, y})
 }
 
 // Additional Helper functions --ToDo => impelemnt
 
 // Maybe not neccessary!?
 func neg(x Exp) Exp {
-    return (Neg)([1]Exp{x})
+	return (Neg)([1]Exp{x})
 }
 
 // Examples
 
 func run(e Exp) {
-    s := make(map[string]Val)
-    t := make(map[string]Type)
-    fmt.Printf("\n ******* ")
-    fmt.Printf("\n %s", e.pretty())
-    fmt.Printf("\n %s", showVal(e.eval(s)))
-    fmt.Printf("\n %s", showType(e.infer(t)))
-    fmt.Printf("\n\n\n")
+	s := make(map[string]Val)
+	t := make(map[string]Type)
+	fmt.Printf("\n ******* ")
+	fmt.Printf("\n %s", e.pretty())
+	fmt.Printf("\n %s", showVal(e.eval(s)))
+	fmt.Printf("\n %s", showType(e.infer(t)))
+	fmt.Printf("\n\n\n")
 }
 
 func ex1() {
-    fmt.Printf(" ex1:")
-    ast := plus(mult(number(1), number(2)), number(0))
-    run(ast)
+	fmt.Printf(" ex1:")
+	ast := plus(mult(number(1), number(2)), number(0))
+	run(ast)
 }
 
 func ex2() {
-    fmt.Printf(" ex2:")
-    ast := and(boolean(false), number(0))
-    run(ast)
+	fmt.Printf(" ex2:")
+	ast := and(boolean(false), number(0))
+	run(ast)
 }
 
 func ex3() {
-    fmt.Printf(" ex3:")
-    ast := or(boolean(false), number(0))
-    run(ast)
+	fmt.Printf(" ex3:")
+	ast := or(boolean(false), number(0))
+	run(ast)
 }
 
 func test() {
-    fmt.Printf("true" + "false")
+	fmt.Printf("true" + "false")
 }
 
 func main() {
 
-    fmt.Printf("\n")
+	fmt.Printf("\n")
 
-    ex1()
-    //ex2()
-    //ex3()
-    //test()
-} 
+	ex1()
+	//ex2()
+	//ex3()
+	//test()
+}
