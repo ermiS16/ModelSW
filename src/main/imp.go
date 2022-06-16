@@ -131,7 +131,7 @@ type Assign struct { // Variable assignment
 	rhs Exp
 }
 
-// Statement cases Additional --ToDo
+// Statement cases Additional --ToDo => Check if Ok
 
 type While struct { // While
 	cond   Exp
@@ -172,7 +172,7 @@ func (decl Decl) pretty() string {
 	return decl.lhs + " := " + decl.rhs.pretty()
 }
 
-// pretty print Additional --ToDo
+// pretty print Additional --ToDo => Check if Ok
 
 func (assign Assign) pretty() string {
 	return assign.lhs + " = " + assign.rhs.pretty()
@@ -267,6 +267,9 @@ func (a Assign) check(t TyState) bool {
 }
 
 // type check Additional --ToDo => implement
+
+
+
 
 /////////////////////////
 // Exp instances
@@ -484,7 +487,7 @@ func (e Lesser) eval(s ValState) Val {
 
 // Maybe implement Grouping
 /*
-func (e Group) evals(s Valstate) Val {
+func (e Group) eval(s Valstate) Val {
 
 }
 */
@@ -625,6 +628,14 @@ func or(x, y Exp) Exp {
 // Maybe not neccessary!?
 func neg(x Exp) Exp {
 	return (Neg)([1]Exp{x})
+}
+
+func less(x, y Exp) Exp {
+    return (Lesser)([2]Exp{x, y})
+}
+
+func equal(x, y Exp) Exp {
+    return (Equal)([2]Exp{x, y})
 }
 
 // Examples
