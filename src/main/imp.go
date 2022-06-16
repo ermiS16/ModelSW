@@ -268,6 +268,7 @@ func (a Assign) check(t TyState) bool {
 
 // type check Additional --ToDo => implement
 
+<<<<<<< HEAD
 
 func (whl While) check(t TyState) bool {
     ty := whl.cond.infer(t)
@@ -293,6 +294,8 @@ func (prnt Print) check(t TyState) bool {
     return true
 }
 
+=======
+>>>>>>> a66617b6d4020c6fbb4cac60c05898e89bca6ad8
 /////////////////////////
 // Exp instances
 
@@ -645,11 +648,11 @@ func neg(x Exp) Exp {
 }
 
 func less(x, y Exp) Exp {
-    return (Lesser)([2]Exp{x, y})
+	return (Lesser)([2]Exp{x, y})
 }
 
 func equal(x, y Exp) Exp {
-    return (Equal)([2]Exp{x, y})
+	return (Equal)([2]Exp{x, y})
 }
 
 // Examples
@@ -682,18 +685,62 @@ func ex3() {
 	run(ast)
 }
 
-
-
 func test() {
 	fmt.Printf("true" + "false")
 }
 
+func testNeg1() {
+	fmt.Print("Test neg 1:")
+	ast := neg(boolean(true))
+	run(ast)
+}
+func testNeg2() {
+	fmt.Print("Test neg 2:")
+	ast := neg(and(boolean(true), boolean(false)))
+	run(ast)
+}
+func testNeg3() {
+	fmt.Print("Test neg 3:")
+	ast := neg(and(boolean(false), boolean(true)))
+	run(ast)
+}
+func testNeg4() {
+	fmt.Print("Test neg 4:")
+	ast := neg(or(boolean(true), boolean(true)))
+	run(ast)
+}
+func testLesser1() {
+	fmt.Print("Test lesser 1:")
+	ast := less(number(3), number(4))
+	run(ast)
+}
+
+func testLesser2() {
+	fmt.Print("Test lesser 2:")
+	ast := less(number(4), number(4))
+	run(ast)
+
+}
+
+func testLesser3() {
+	fmt.Print("Test lesser 3:")
+	ast := less(number(4), number(2))
+	run(ast)
+
+}
 func main() {
 
 	fmt.Printf("\n")
-    
-	ex1()
+
+	// ex1()
 	//ex2()
 	//ex3()
 	//test()
+	// testNeg1()
+	// testNeg3()
+	// testNeg4()
+	// testNeg2()
+	testLesser1()
+	testLesser2()
+	testLesser3()
 }
