@@ -238,7 +238,7 @@ func (whl While) eval(s ValState) {
 }
 
 func (prnt Print) eval(s ValState) {
-	v := prnt.exp.eval(s)
+	prnt.exp.eval(s)
 }
 
 // type check
