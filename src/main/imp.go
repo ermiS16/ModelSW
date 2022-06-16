@@ -179,23 +179,19 @@ func (assign Assign) pretty() string {
 }
 
 // Maybe implement this. Not clear if neccessary
-/*
+
 func (ite IfThenElse) pretty() string{
-
+    return "if( " + ite.cond.pretty() + " ) {\n    " + ite.thenStmt.pretty() + "\n} else {\n    " + ite.elseStmt.pretty() + "\n}"
 }
-*/
 
-/*
 func (whl While) pretty() string{
-
+    return "while(" + whl.cond.pretty() + " ) {\n    " + whl.doStmt.pretty() + "\n}"
 }
-*/
 
-/*
 func (prnt Print) pretty() string{
-
+    return prnt.pretty()
 }
-*/
+
 
 // eval
 
@@ -268,7 +264,6 @@ func (a Assign) check(t TyState) bool {
 
 // type check Additional --ToDo => implement
 
-<<<<<<< HEAD
 
 func (whl While) check(t TyState) bool {
     ty := whl.cond.infer(t)
@@ -294,8 +289,6 @@ func (prnt Print) check(t TyState) bool {
     return true
 }
 
-=======
->>>>>>> a66617b6d4020c6fbb4cac60c05898e89bca6ad8
 /////////////////////////
 // Exp instances
 
