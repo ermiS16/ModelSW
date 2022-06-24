@@ -180,18 +180,17 @@ func (assign Assign) pretty() string {
 
 // Maybe implement this. Not clear if neccessary
 
-func (ite IfThenElse) pretty() string{
-    return "if( " + ite.cond.pretty() + " ) {\n    " + ite.thenStmt.pretty() + "\n} else {\n    " + ite.elseStmt.pretty() + "\n}"
+func (ite IfThenElse) pretty() string {
+	return "if( " + ite.cond.pretty() + " ) {\n    " + ite.thenStmt.pretty() + "\n} else {\n    " + ite.elseStmt.pretty() + "\n}"
 }
 
-func (whl While) pretty() string{
-    return "while(" + whl.cond.pretty() + " ) {\n    " + whl.doStmt.pretty() + "\n}"
+func (whl While) pretty() string {
+	return "while(" + whl.cond.pretty() + " ) {\n    " + whl.doStmt.pretty() + "\n}"
 }
 
-func (prnt Print) pretty() string{
-    return prnt.pretty()
+func (prnt Print) pretty() string {
+	return prnt.pretty()
 }
-
 
 // eval
 
@@ -264,29 +263,28 @@ func (a Assign) check(t TyState) bool {
 
 // type check Additional --ToDo => implement
 
-
 func (whl While) check(t TyState) bool {
-    ty := whl.cond.infer(t)
-    if ty == TyIllTyped || ty == TyInt {
-        return false
-    }
-    return true
+	ty := whl.cond.infer(t)
+	if ty == TyIllTyped || ty == TyInt {
+		return false
+	}
+	return true
 }
 
 func (ite IfThenElse) check(t TyState) bool {
-    ty := ite.cond.infer(t)
-    if ty == TyIllTyped || ty == TyInt {
-        return false
-    }
-    return true
+	ty := ite.cond.infer(t)
+	if ty == TyIllTyped || ty == TyInt {
+		return false
+	}
+	return true
 }
 
 func (prnt Print) check(t TyState) bool {
-    ty := prnt.exp.infer(t)
-    if ty == TyIllTyped {
-        return false
-    }
-    return true
+	ty := prnt.exp.infer(t)
+	if ty == TyIllTyped {
+		return false
+	}
+	return true
 }
 
 /////////////////////////
@@ -502,7 +500,6 @@ func (e Lesser) eval(s ValState) Val {
 	return mkUndefined()
 }
 
-
 // Type inferencer/checker
 
 func (x Var) infer(t TyState) Type {
@@ -709,6 +706,28 @@ func testLesser3() {
 	run(ast)
 
 }
+
+// Tests for equals
+func testEq1() {
+	fmt.Print("Test Equals 1:")
+	ast := equal(neg(boolean(true)), less(number(4), number(6)))
+	run(ast)
+}
+func testEq2() {
+	fmt.Print("Test Equals 2:")
+	ast := equal(neg(boolean(true)), less(number(6), number(6)))
+	run(ast)
+}
+func testEq3() {
+	fmt.Print("Test Equals3:")
+	ast := equal(and(boolean(true), and(boolean(true), boolean(false))), or(boolean(true), boolean(false)))
+	run(ast)
+}
+func testimp() {
+	fmt.Print("Test implication with or and not")
+	ast := or(neg(boolean(true)), boolean(false))
+	run(ast)
+}
 func main() {
 
 	fmt.Printf("\n")
@@ -720,7 +739,12 @@ func main() {
 	// testNeg3()
 	// testNeg4()
 	// testNeg2()
-	testLesser1()
+	// testLesser1()
 	// testLesser2()
 	// tetLesser3()
+	// testEq1()
+	// testEq2()
+	// testEq3()
+	testimp()
+
 }
