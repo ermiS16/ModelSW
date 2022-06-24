@@ -639,6 +639,7 @@ func equal(x, y Exp) Exp {
 	return (Equal)([2]Exp{x, y})
 }
 
+
 // Examples
 
 func run(e Exp) {
