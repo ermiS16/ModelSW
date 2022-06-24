@@ -131,7 +131,7 @@ type Assign struct { // Variable assignment
 	rhs Exp
 }
 
-// Statement cases Additional --ToDo => Check if Ok
+// Solution: statement cases
 
 type While struct { // While
 	cond   Exp
@@ -152,7 +152,7 @@ type And [2]Exp  // Conjunction
 type Or [2]Exp   // Disjunction
 type Var string  // Variable
 
-// Expression Additional --ToDo => Check if Ok
+// Solution: expression cases
 
 type Neg [1]Exp    // Negation
 type Equal [2]Exp  // Equality test
@@ -172,13 +172,13 @@ func (decl Decl) pretty() string {
 	return decl.lhs + " := " + decl.rhs.pretty()
 }
 
-// pretty print Additional --ToDo => Check if Ok
+// Solution: pretty print statements
 
 func (assign Assign) pretty() string {
 	return assign.lhs + " = " + assign.rhs.pretty()
 }
 
-// Maybe implement this. Not clear if neccessary
+// Not clear if neccessary
 
 func (ite IfThenElse) pretty() string {
 	return "if( " + ite.cond.pretty() + " ) {\n    " + ite.thenStmt.pretty() + "\n} else {\n    " + ite.elseStmt.pretty() + "\n}"
@@ -223,7 +223,7 @@ func (decl Decl) eval(s ValState) {
 	s[x] = v
 }
 
-// eval Additional --ToDo => Check if Ok
+// Solution eval statements
 
 func (whl While) eval(s ValState) {
 	v := whl.cond.eval(s)
@@ -261,7 +261,7 @@ func (a Assign) check(t TyState) bool {
 	return t[x] == a.rhs.infer(t)
 }
 
-// type check Additional --ToDo => implement
+// Solution: type check statements
 
 func (whl While) check(t TyState) bool {
 	ty := whl.cond.infer(t)
@@ -357,7 +357,7 @@ func (e Or) pretty() string {
 	return x
 }
 
-// Exp pretty print Additional --ToDo => Check if OK
+// Solution: pretty print exp
 
 func (e Neg) pretty() string {
 
@@ -455,7 +455,7 @@ func (e Or) eval(s ValState) Val {
 	return mkUndefined()
 }
 
-// Evaluator Addition --ToDo => Check if OK
+// Solution: evaluator expressions
 
 func (e Neg) eval(s ValState) Val {
 	n1 := e[0].eval(s)
@@ -557,7 +557,7 @@ func (e Or) infer(t TyState) Type {
 	return TyIllTyped
 }
 
-// Type inferencer/checker Addition --ToDo => check if OK
+// Solution: type inferencer/checker
 
 func (e Neg) infer(t TyState) Type {
 	t1 := e[0].infer(t)
@@ -566,7 +566,7 @@ func (e Neg) infer(t TyState) Type {
 	}
 	return TyIllTyped
 
-} // Set curly bracket to close the function
+}
 
 func (e Equal) infer(t TyState) Type {
 	t1 := e[0].infer(t)
@@ -621,7 +621,7 @@ func or(x, y Exp) Exp {
 	return (Or)([2]Exp{x, y})
 }
 
-// Additional Helper functions --ToDo => impelemnt
+// Solution: helper functions
 
 // Maybe not neccessary!?
 func neg(x Exp) Exp {
@@ -666,6 +666,8 @@ func ex3() {
 	ast := or(boolean(false), number(0))
 	run(ast)
 }
+
+// Solution: examples
 
 func testNeg1() {
 	fmt.Print("Test neg 1:")
@@ -735,16 +737,16 @@ func main() {
 	// ex1()
 	//ex2()
 	//ex3()
-	// testNeg1()
-	// testNeg3()
-	// testNeg4()
-	// testNeg2()
-	// testLesser1()
-	// testLesser2()
-	// tetLesser3()
-	// testEq1()
-	// testEq2()
-	// testEq3()
+	testNeg1()
+	testNeg2()
+	testNeg3()
+	testNeg4()
+	testLesser1()
+	testLesser2()
+	testLesser3()
+	testEq1()
+	testEq2()
+	testEq3()
 	testimp()
 
 }
