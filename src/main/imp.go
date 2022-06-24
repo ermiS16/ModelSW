@@ -730,10 +730,10 @@ func testimp() {
 	ast := or(neg(boolean(true)), boolean(false))
 	run(ast)
 }
+
 func main() {
 
 	fmt.Printf("\n")
-
 	// ex1()
 	//ex2()
 	//ex3()
@@ -748,5 +748,4 @@ func main() {
 	testEq2()
 	testEq3()
 	testimp()
-
 }
