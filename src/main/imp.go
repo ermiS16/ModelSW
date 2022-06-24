@@ -636,7 +636,6 @@ func equal(x, y Exp) Exp {
 	return (Equal)([2]Exp{x, y})
 }
 
-
 // Examples
 
 func run(e Exp) {
@@ -731,6 +730,22 @@ func testimp() {
 	run(ast)
 }
 
+func testError1() {
+	fmt.Print("Test Error handling:")
+	ast := and(boolean(true), number(2))
+	run(ast)
+}
+func testError2() {
+	fmt.Print("Test Error handling!")
+	ast := less(boolean(false), number(4))
+	run(ast)
+}
+func testError3() {
+	fmt.Print("Test Error handling!")
+	ast := equal(number(1), boolean(true))
+	run(ast)
+}
+
 func main() {
 
 	fmt.Printf("\n")
@@ -748,4 +763,8 @@ func main() {
 	testEq2()
 	testEq3()
 	testimp()
+	testError1()
+	testError2()
+	testError3()
+
 }
