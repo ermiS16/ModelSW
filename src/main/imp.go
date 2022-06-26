@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"strconv"
+    "unicode"
 )
 
 // Simple imperative language
@@ -227,7 +228,7 @@ func (decl Decl) eval(s ValState) {
 
 func (whl While) eval(s ValState) {
 	v := whl.cond.eval(s)
-	if v.flag == ValueBool {
+	if v.flag == ValueBool && v.valB == true {
 		whl.doStmt.eval(s)
 	}
 }
@@ -456,6 +457,35 @@ func (e Or) eval(s ValState) Val {
 }
 
 // Solution: evaluator expressions
+
+func (e Var) eval(s ValState) Val {
+    y := (string)(e)
+//     fmt.Printf("Name: %s\n", y)
+    if !isVarNameCorrect(y) {
+        fmt.Printf(" Syntax Error: Variable Name should start with a lowercase letter")
+        return mkUndefined()
+    }
+//     fmt.Printf("%s\n", s)    
+    val, ok := s[y]
+//     fmt.Printf("%s\n", val.flag)
+//     fmt.Printf("%s\n", ok)
+
+    //     fmt.Printf("%s\n", s[y].flag)
+
+    if !ok {
+        return mkUndefined()
+    }else{
+        if val.flag == ValueInt {
+            return mkInt(s[y].valI)
+        }
+        
+        if val.flag == ValueBool {
+            return mkBool(s[y].valB)
+        }
+    }
+    
+    return mkUndefined()
+}
 
 func (e Neg) eval(s ValState) Val {
 	n1 := e[0].eval(s)
@@ -746,25 +776,122 @@ func testError3() {
 	run(ast)
 }
 
+// --------------
+
+func variable(x string) Exp {
+    return Var(x)
+}
+
+func declVar(x string, y Exp) *Decl{    
+    declVar := Decl{lhs: x, rhs: y}
+    return &declVar
+}
+
+func assignVar(x string, y Exp) {
+    
+}
+
+func testDecl() {
+    s := make(map[string]Val)
+	t := make(map[string]Type)
+	fmt.Print("Test var declaration!")
+    fmt.Printf("\n ******* \n")
+    
+    nameString := "testVariable"
+    
+    varName := variable(nameString)    
+    varValue := number(2)
+    decl := declVar(varName.pretty(), varValue)
+    decl.eval(s)
+    decl.check(t)
+    fmt.Printf("\n %s", decl.pretty())
+    fmt.Printf("\n %s", showVal(varName.eval(s)))
+    fmt.Printf("\n %s", showType(varName.infer(t)))
+
+    fmt.Printf("\n\n\n")    
+    
+    varName2 := variable(nameString)    
+    varValue2 := boolean(true)
+    decl2 := declVar(varName2.pretty(), varValue2)
+    decl2.eval(s)
+    decl2.check(t)
+
+    fmt.Printf("\n %s", decl2.pretty())
+    fmt.Printf("\n %s", showVal(varName2.eval(s)))
+    fmt.Printf("\n %s", showType(varName2.infer(t)))
+
+    fmt.Printf("\n\n\n")
+
+    
+    varName3 := variable(nameString)    
+    varValue3 := equal(neg(boolean(true)), less(number(4), number(6)))
+    decl3 := declVar(varName3.pretty(), varValue3)
+    decl3.eval(s)
+    decl3.check(t)
+
+    fmt.Printf("\n %s", decl3.pretty())
+    fmt.Printf("\n %s", showVal(varName3.eval(s)))
+    fmt.Printf("\n %s", showType(varName3.infer(t)))
+
+    fmt.Printf("\n\n\n")
+
+}
+
+func testVar() {
+    s := make(map[string]Val)
+	t := make(map[string]Type)
+	fmt.Print("Test Var!")
+    fmt.Printf("\n ******* \n")
+    
+    nameString := "testVariable"
+    
+    varName := variable(nameString)
+	fmt.Printf("\n %s", showVal(varName.eval(s)))
+    fmt.Printf("\n %s", showType(varName.infer(t)))
+    
+    fmt.Printf("\n\n\n")    
+}
+
+func testValDecl() {
+    
+}
+
+func testValAssign() {
+    
+}
+
+// ----------------
+
 func main() {
 
 	fmt.Printf("\n")
 	// ex1()
 	//ex2()
 	//ex3()
-	testNeg1()
-	testNeg2()
-	testNeg3()
-	testNeg4()
-	testLesser1()
-	testLesser2()
-	testLesser3()
-	testEq1()
-	testEq2()
-	testEq3()
-	testimp()
-	testError1()
-	testError2()
-	testError3()
+// 	testNeg1()
+// 	testNeg2()
+// 	testNeg3()
+// 	testNeg4()
+// 	testLesser1()
+// 	testLesser2()
+// 	testLesser3()
+// 	testEq1()
+// 	testEq2()
+// 	testEq3()
+// 	testimp()
+// 	testError1()
+// 	testError2()
+// 	testError3()
+//     testVar()
+    testDecl()
+}
 
+func isVarNameCorrect(s string) bool {
+   r := []rune(s)
+//    fmt.Print(r[0])   
+   if unicode.IsLetter(r[0]) && unicode.IsLower(r[0]) {
+       return true
+   }
+   
+   return false
 }
