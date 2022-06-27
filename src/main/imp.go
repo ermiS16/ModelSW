@@ -125,6 +125,7 @@ type IfThenElse struct { // If-then-else
 	cond     Exp
 	thenStmt Stmt
 	elseStmt Stmt
+    flag bool
 }
 
 type Assign struct { // Variable assignment
@@ -206,8 +207,10 @@ func (ite IfThenElse) eval(s ValState) {
 		switch {
 		case v.valB:
 			ite.thenStmt.eval(s)
+            ite.flag = true
 		case !v.valB:
 			ite.elseStmt.eval(s)
+            ite.flag = false
 		}
 
 	} else {
@@ -466,17 +469,11 @@ func (e Or) eval(s ValState) Val {
 
 func (e Var) eval(s ValState) Val {
     y := (string)(e)
-//     fmt.Printf("Name: %s\n", y)
     if !isVarNameCorrect(y) {
         fmt.Printf(" Syntax Error: Variable Name should start with a lowercase letter")
         return mkUndefined()
     }
-//     fmt.Printf("%s\n", s)    
     val, ok := s[y]
-//     fmt.Printf("%s\n", val.flag)
-//     fmt.Printf("%s\n", ok)
-
-    //     fmt.Printf("%s\n", s[y].flag)
 
     if !ok {
         return mkUndefined()
@@ -808,6 +805,43 @@ func assignVar(x string, y Exp, s ValState, t TyState) *Assign {
     
 }
 
+func testIfThenElse() {
+    s := make(map[string]Val)
+	t := make(map[string]Type)
+	fmt.Print("Test var Assignment!")
+    fmt.Printf("\n ******* \n")
+    
+    nameString := "testVariable"
+    
+    varName := variable(nameString)    
+    varValue := number(2)
+    decl := declVar(varName.pretty(), varValue, s, t)
+    
+    newValue1 := number(100)
+    assign1 := assignVar(decl.lhs, newValue1, s, t)
+    
+    newValue2 := number(200)
+    assign2 := assignVar(decl.lhs, newValue2, s, t)
+    
+    cond := less(number(200), number(100))
+    thenStmt := assign1
+	elseStmt := assign2
+        
+    ite := IfThenElse{cond: cond, thenStmt: thenStmt, elseStmt: elseStmt, flag: true}
+    
+    if ite.check(t){
+        ite.eval(s)
+        fmt.Printf("\n %s", ite.pretty())
+        fmt.Printf("\n %s", ite.flag)
+        if ite.flag == true {
+            fmt.Printf("\n %s", assign1.pretty())
+        }else{
+            fmt.Printf("\n %s", assign2.pretty())            
+        }
+        fmt.Printf("\n %s", showType(varName.infer(t)))
+    }
+}
+
 func testAssign() {
     s := make(map[string]Val)
 	t := make(map[string]Type)
@@ -828,9 +862,22 @@ func testAssign() {
     }
     
     fmt.Printf("\n\n\n") 
-    
-    newValue := boolean(true)
+
+    newValue := number(3)
     assign := assignVar(varName.pretty(), newValue, s, t)
+    if assign != nil {
+        fmt.Printf("\n %s", assign.pretty())
+        fmt.Printf("\n %s", showVal(varName.eval(s)))
+        fmt.Printf("\n %s", showType(varName.infer(t)))
+    }else{
+        fmt.Printf("\n Assignment not possible \n")
+    }
+    
+    fmt.Printf("\n\n\n") 
+    
+    
+    newValue = boolean(true)
+    assign = assignVar(varName.pretty(), newValue, s, t)
     if assign != nil {
         fmt.Printf("\n %s", assign.pretty())
         fmt.Printf("\n %s", showVal(varName.eval(s)))
@@ -914,14 +961,6 @@ func testVar() {
     fmt.Printf("\n\n\n")    
 }
 
-func testValDecl() {
-    
-}
-
-func testValAssign() {
-    
-}
-
 // ----------------
 
 func main() {
@@ -945,8 +984,10 @@ func main() {
 // 	testError2()
 // 	testError3()
 //     testVar()
-    testDecl()
+//     testDecl()
 //     testAssign()
+    testIfThenElse()
+    
 }
 
 func isVarNameCorrect(s string) bool {
