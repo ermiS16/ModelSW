@@ -179,8 +179,6 @@ func (assign Assign) pretty() string {
 	return assign.lhs + " = " + assign.rhs.pretty()
 }
 
-// Not clear if neccessary
-
 func (ite IfThenElse) pretty() string {
 	return "if( " + ite.cond.pretty() + " ) {\n    " + ite.thenStmt.pretty() + "\n} else {\n    " + ite.elseStmt.pretty() + "\n}"
 }
@@ -244,7 +242,6 @@ func (whl While) eval(s ValState) {
 }
 
 func (prnt Print) eval(s ValState) {
-//     prnt.exp.eval(s)
     fmt.Printf("%s\n", showVal(prnt.exp.eval(s)))
 }
 
@@ -277,18 +274,18 @@ func (a Assign) check(t TyState) bool {
 
 func (whl While) check(t TyState) bool {
 	ty := whl.cond.infer(t)
-	if ty == TyIllTyped || ty == TyInt {
-		return false
+	if ty == TyBool{
+		return true
 	}
-	return true
+	return false
 }
 
 func (ite IfThenElse) check(t TyState) bool {
 	ty := ite.cond.infer(t)
-	if ty == TyIllTyped || ty == TyInt {
-		return false
+	if ty == TyBool{
+		return true
 	}
-	return true
+	return false
 }
 
 func (prnt Print) check(t TyState) bool {
@@ -475,8 +472,8 @@ func (e Var) eval(s ValState) Val {
         fmt.Printf(" Syntax Error: Variable Name should start with a lowercase letter")
         return mkUndefined()
     }
-    val, ok := s[y]
 
+    val, ok := s[y]
     if !ok {
         return mkUndefined()
     }else{
@@ -781,7 +778,7 @@ func testError3() {
 	run(ast)
 }
 
-// --------------
+// 
 
 func variable(x string) Exp {
     return Var(x)
