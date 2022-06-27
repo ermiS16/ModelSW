@@ -233,14 +233,19 @@ func (assign Assign) eval(s ValState) {
 }
 
 func (whl While) eval(s ValState) {
-	v := whl.cond.eval(s)
-	if v.flag == ValueBool && v.valB == true {
-		whl.doStmt.eval(s)
-	}
+    for{
+        v := whl.cond.eval(s)
+        if v.flag == ValueBool && v.valB == true {
+            whl.doStmt.eval(s)
+        }else{
+            break
+        }
+    }
 }
 
 func (prnt Print) eval(s ValState) {
-    prnt.exp.eval(s)
+//     prnt.exp.eval(s)
+    fmt.Printf("%s\n", showVal(prnt.exp.eval(s)))
 }
 
 // type check
@@ -809,32 +814,23 @@ func testWhile() {
     fmt.Printf("\n ******* \n")
     
     max := number(10)
-    initNumber := number(0)
     nameString := "testVariable"
+    
     varName := variable(nameString)
+    index := declVar(varName.pretty(), number(0), s, t)
     
-    index := declVar(varName.pretty(), initNumber, s, t)
-    
-	
     cond := less(varName, max)
     
     prntStmt := Print{exp: varName}
-    assignStmt := assignVar(index.lhs, plus(varName, number(1)), s, t)
+    assignStmt := assignVar(varName.pretty(), plus(varName, number(1)), s, t)
 	doStmt := Seq{prntStmt, assignStmt}
+    
     whl := While{cond: cond, doStmt: doStmt}
     
     fmt.Printf("\n %s\n ", index.pretty())
     fmt.Printf("\n %s\n", whl.pretty())
 
-    for{
-        whl.eval(s)
-        fmt.Printf("%s\n", showVal(varName.eval(s)))
-               
-        if varName.eval(s) == max.eval(s) {
-            break
-        }
-    }
-    
+    whl.eval(s)
     
     fmt.Printf("\n\n\n")     
     
