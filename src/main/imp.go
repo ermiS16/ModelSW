@@ -224,12 +224,24 @@ func (decl Decl) eval(s ValState) {
 
 // Solution eval statements
 
+
+/*
+ * Eval for assignment is the same as for declaration.
+ * The Variable-Value Table s is updated with the new value
+ */
 func (assign Assign) eval(s ValState) {
     v := assign.rhs.eval(s)
     x := (string)(assign.lhs)
     s[x] = v
 }
 
+/*
+ * To simulate a while-loop, the evaluation uses a for-loop.
+ * In every iteration the condition is checked.
+ * If the condition holds, the doStmt is evaluated.
+ * That can be any statement that's described on top in the imp.
+ * Otherwise the end of loop is reached and exited via break.
+ */
 func (whl While) eval(s ValState) {
     for{
         v := whl.cond.eval(s)
@@ -241,8 +253,13 @@ func (whl While) eval(s ValState) {
     }
 }
 
+/*
+ * Evaluation for the print statement evaluates the expression
+ * and prints it's value via fmt.Printf
+ */
 func (prnt Print) eval(s ValState) {
-    fmt.Printf("%s\n", showVal(prnt.exp.eval(s)))
+    v := prnt.exp.eval(s)
+    fmt.Printf("%s\n", showVal(v))
 }
 
 // type check
@@ -254,6 +271,9 @@ func (stmt Seq) check(t TyState) bool {
 	return stmt[1].check(t)
 }
 
+/*
+ * Check whether or not the type of the assigned expression isn't illtyped
+ */
 func (decl Decl) check(t TyState) bool {
 	ty := decl.rhs.infer(t)
 	if ty == TyIllTyped {
@@ -265,6 +285,9 @@ func (decl Decl) check(t TyState) bool {
 	return true
 }
 
+/*
+ * Check if the new type is the same as the type the variable a is currently holding.
+ */
 func (a Assign) check(t TyState) bool {
 	x := (string)(a.lhs)
 	return t[x] == a.rhs.infer(t)
@@ -272,6 +295,11 @@ func (a Assign) check(t TyState) bool {
 
 // Solution: type check statements
 
+/*
+ * The condition of the while-loop must habe the type bool.
+ * Hence the check return false it that's not the case.
+ * Only if the condition is an boolean the check return true.
+ */
 func (whl While) check(t TyState) bool {
 	ty := whl.cond.infer(t)
 	if ty == TyBool{
@@ -280,6 +308,11 @@ func (whl While) check(t TyState) bool {
 	return false
 }
 
+/*
+ * The condition of the while-loop must habe the type bool.
+ * Hence the check return false it that's not the case.
+ * Only if the condition is an boolean the check return true.
+ */
 func (ite IfThenElse) check(t TyState) bool {
 	ty := ite.cond.infer(t)
 	if ty == TyBool{
@@ -288,6 +321,14 @@ func (ite IfThenElse) check(t TyState) bool {
 	return false
 }
 
+/*
+ * To print an expression it must be have an actual type.
+ * The check doesn't hold if the type is illtyped.
+ * Otherwise the check is ok. There is no need to check
+ * for bool or integer especially. Other types might be
+ * added in the future, and this way the check doesn't
+ * need to be modified.
+ */
 func (prnt Print) check(t TyState) bool {
 	ty := prnt.exp.infer(t)
 	if ty == TyIllTyped {
@@ -466,12 +507,19 @@ func (e Or) eval(s ValState) Val {
 
 // Solution: evaluator expressions
 
+/*
+ * A variable is a string consisting of it's own name.
+ * The Variable-Table s is searched for the variable e.
+ * If there is a value and it's ok the evaluation returns
+ * the actual value of the variable. Otherwise it's undefined.
+ */
 func (e Var) eval(s ValState) Val {
     y := (string)(e)
-    if !isVarNameCorrect(y) {
-        fmt.Printf(" Syntax Error: Variable Name should start with a lowercase letter")
-        return mkUndefined()
-    }
+
+//     if !isVarNameCorrect(y) {
+//         fmt.Printf(" Syntax Error: Variable Name should start with a lowercase letter")
+//         return mkUndefined()
+//     }
 
     val, ok := s[y]
     if !ok {
@@ -489,6 +537,14 @@ func (e Var) eval(s ValState) Val {
     return mkUndefined()
 }
 
+/*
+ * A negation consists of one Expression. 
+ * Only booleans can be negated.
+ * If the flag of the expression is an bool
+ * the value is flipped and a new bool returned.
+ * If the expression is not an boolean, the value
+ * is undefined.
+ */
 func (e Neg) eval(s ValState) Val {
 	n1 := e[0].eval(s)
 	switch {
@@ -500,6 +556,13 @@ func (e Neg) eval(s ValState) Val {
 	return mkUndefined()
 }
 
+/*
+ * Both operands of the equals expression has to be from
+ * the same type. Integer can't be compared to booleans.
+ * If both are from the same type they're compared and
+ * the result of the comparision is returned.
+ * Aren't both operands from the same type the result is undefined.
+ */
 func (e Equal) eval(s ValState) Val {
 	n1 := e[0].eval(s)
 	n2 := e[1].eval(s)
@@ -522,6 +585,13 @@ func (e Equal) eval(s ValState) Val {
 	return mkUndefined()
 }
 
+/*
+ * Both operands of the lesser expression has to be from
+ * the same type. Integer can't be compared to booleans.
+ * If both are from the same type they're compared and
+ * the result of the comparision is returned.
+ * Aren't both operands from the same type the result is undefined.
+ */
 func (e Lesser) eval(s ValState) Val {
 	n1 := e[0].eval(s)
 	n2 := e[1].eval(s)
@@ -591,6 +661,11 @@ func (e Or) infer(t TyState) Type {
 
 // Solution: type inferencer/checker
 
+/*
+ * The type must be a boolean for a negation.
+ * If that's the case the type TyBool is returned.
+ * Otherwise it's illtyped.
+ */
 func (e Neg) infer(t TyState) Type {
 	t1 := e[0].infer(t)
 	if t1 == TyBool {
@@ -600,6 +675,11 @@ func (e Neg) infer(t TyState) Type {
 
 }
 
+/*
+ * To compare two operands, they have to be from the same type.
+ * The return type of the expression equal is always a boolean
+ * if both operands can be compared. Otherwise it's illtyped.
+ */
 func (e Equal) infer(t TyState) Type {
 	t1 := e[0].infer(t)
 	t2 := e[1].infer(t)
@@ -611,6 +691,18 @@ func (e Equal) infer(t TyState) Type {
 	}
 	return TyIllTyped
 }
+
+/*
+ * To compare two operands, they have to be from the same type.
+ * In the case of lesser, it's neccessary that they're integer.
+ * Booleans can't be compared with the lesser expression and
+ * other types aren't implemented in this imp, aside from integesers.
+ * That might change in the future and all types
+ * that can be compared by the lesser expression need to be
+ * added in this inferencer.
+ * The return type of the expression equal is always a boolean
+ * if both operands can be compared. Otherwise it's illtyped.
+ */
 
 func (e Lesser) infer(t TyState) Type {
 	t1 := e[0].infer(t)
@@ -655,7 +747,6 @@ func or(x, y Exp) Exp {
 
 // Solution: helper functions
 
-// Maybe not neccessary!?
 func neg(x Exp) Exp {
 	return (Neg)([1]Exp{x})
 }
@@ -680,18 +771,27 @@ func run(e Exp) {
 	fmt.Printf("\n\n\n")
 }
 
+//  ((1*2)+0)
+//  2
+//  Int
 func ex1() {
 	fmt.Printf(" ex1:")
 	ast := plus(mult(number(1), number(2)), number(0))
 	run(ast)
 }
 
+//  (false&&0)
+//  false
+//  Illtyped
 func ex2() {
 	fmt.Printf(" ex2:")
 	ast := and(boolean(false), number(0))
 	run(ast)
 }
 
+//  (false||0)
+//  Undefined
+//  Illtyped
 func ex3() {
 	fmt.Printf(" ex3:")
 	ast := or(boolean(false), number(0))
@@ -700,32 +800,54 @@ func ex3() {
 
 // Solution: examples
 
+//  (!true)
+//  false
+//  Bool
 func testNeg1() {
 	fmt.Print("Test neg 1:")
 	ast := neg(boolean(true))
 	run(ast)
 }
+
+//  (!(true&&false))
+//  true
+//  Bool
 func testNeg2() {
 	fmt.Print("Test neg 2:")
 	ast := neg(and(boolean(true), boolean(false)))
 	run(ast)
 }
+
+//  (!(false&&true))
+//  true
+//  Bool
 func testNeg3() {
 	fmt.Print("Test neg 3:")
 	ast := neg(and(boolean(false), boolean(true)))
 	run(ast)
 }
+
+//  (!(true||true))
+//  false
+//  Bool
 func testNeg4() {
 	fmt.Print("Test neg 4:")
 	ast := neg(or(boolean(true), boolean(true)))
 	run(ast)
 }
+
+//  (3 < 4)
+//  true
+//  Bool
 func testLesser1() {
 	fmt.Print("Test lesser 1:")
 	ast := less(number(3), number(4))
 	run(ast)
 }
 
+//  (4 < 4)
+//  false
+//  Bool
 func testLesser2() {
 	fmt.Print("Test lesser 2:")
 	ast := less(number(4), number(4))
@@ -733,6 +855,9 @@ func testLesser2() {
 
 }
 
+//  (4 < 2)
+//  false
+//  Bool
 func testLesser3() {
 	fmt.Print("Test lesser 3:")
 	ast := less(number(4), number(2))
@@ -740,50 +865,83 @@ func testLesser3() {
 
 }
 
-// Tests for equals
+//  ((!true) == (4 < 6))
+//  false
+//  Bool
 func testEq1() {
 	fmt.Print("Test Equals 1:")
 	ast := equal(neg(boolean(true)), less(number(4), number(6)))
 	run(ast)
 }
+
+//  ((!true) == (6 < 6))
+//  true
+//  Bool
 func testEq2() {
 	fmt.Print("Test Equals 2:")
 	ast := equal(neg(boolean(true)), less(number(6), number(6)))
 	run(ast)
 }
+
+//  ((true&&(true&&false)) == (true||false))
+//  false
+//  Bool
 func testEq3() {
 	fmt.Print("Test Equals3:")
 	ast := equal(and(boolean(true), and(boolean(true), boolean(false))), or(boolean(true), boolean(false)))
 	run(ast)
 }
+
+//  ((!true)||false)
+//  false
+//  Bool
 func testimp() {
 	fmt.Print("Test implication with or and not")
 	ast := or(neg(boolean(true)), boolean(false))
 	run(ast)
 }
 
+//  (true&&2)
+//  Undefined
+//  Illtyped
 func testError1() {
 	fmt.Print("Test Error handling:")
 	ast := and(boolean(true), number(2))
 	run(ast)
 }
+
+//  (false < 4)
+//  Undefined
+//  Illtyped
 func testError2() {
 	fmt.Print("Test Error handling!")
 	ast := less(boolean(false), number(4))
 	run(ast)
 }
+
+//  (1 == true)
+//  Undefined
+//  Illtyped
 func testError3() {
 	fmt.Print("Test Error handling!")
 	ast := equal(number(1), boolean(true))
 	run(ast)
 }
 
-// 
 
+// Helper function to test statements
+
+/*
+ * Creates an expression Var and returns it.
+ */
 func variable(x string) Exp {
     return Var(x)
 }
 
+/*
+ * Creates a declaration structure and updates the lookup-tables s and t.
+ * Only if the check of the type holds, the value is assigned to the variable.
+ */
 func declVar(x string, y Exp, s ValState, t TyState) *Decl{    
     declVar := Decl{lhs: x, rhs: y}
     if declVar.check(t){
@@ -794,6 +952,11 @@ func declVar(x string, y Exp, s ValState, t TyState) *Decl{
     
 }
 
+/*
+ * Creates a assign structure and updated the lookup-tables s and t.
+ * Only if the check of the type holds, the value is assigned to the variable.
+ * The new type must be the same as the type of the value the variable is currently holding.
+ */
 func assignVar(x string, y Exp, s ValState, t TyState) *Assign {
     assignVar := Assign{lhs: x, rhs: y}
     if assignVar.check(t) {
@@ -804,10 +967,27 @@ func assignVar(x string, y Exp, s ValState, t TyState) *Assign {
     
 }
 
+/*
+ * Function for testing while statement.
+ * The following structure is tested.
+
+    while((testVariable < 10) ) {
+        Print(testVariable); testVariable = (testVariable+1)
+    }
+
+ * As long as the testVariable is less than 10, the
+ * value of the variable is printed via the print statement
+ * and then the value is increased by 1.
+ * That's also the abort condition of the while loop.
+ * The doStmt statement is a commmand sequence statement.
+ * It's an array consisting the two statement belonging to
+ * a command sequence separated by ;.
+ */
+
 func testWhile() {
     s := make(map[string]Val)
 	t := make(map[string]Type)
-	fmt.Print("Test var Assignment!")
+	fmt.Print("Test While!")
     fmt.Printf("\n ******* \n")
     
     max := number(10)
@@ -833,10 +1013,25 @@ func testWhile() {
     
 }
 
+
+/*
+ * Function to test the if-then-else statement.
+ * The following structure is tested:
+    
+    // if( (200 < 100) ) {
+    if( (100 < 200) ) {
+        testVariable = 100
+    } else {
+        testVariable = 200
+    }
+    
+ * To print the result of the test, part of the evaluation
+ * (ite.cond.eval(s).valB) is copied to get the right result. 
+ */
 func testIfThenElse() {
     s := make(map[string]Val)
 	t := make(map[string]Type)
-	fmt.Print("Test var Assignment!")
+	fmt.Print("Test If-Then-Else!")
     fmt.Printf("\n ******* \n")
     
     nameString := "testVariable"
@@ -861,16 +1056,49 @@ func testIfThenElse() {
         ite.eval(s)
         fmt.Printf("\n %s", ite.pretty())
         
+//         testVariable = 100
         if ite.cond.eval(s).valB {
             fmt.Printf("\n %s", assign1.pretty())
         }else{
             fmt.Printf("\n %s", assign2.pretty())            
         }
+        
+//         Int
         fmt.Printf("\n %s", showType(varName.infer(t)))
     }
     fmt.Printf("\n\n\n")     
+
+    
+    cond = less(number(200), number(100))        
+    ite = IfThenElse{cond: cond, thenStmt: thenStmt, elseStmt: elseStmt}
+    
+    if ite.check(t){
+        ite.eval(s)
+        fmt.Printf("\n %s", ite.pretty())
+
+//         testVariable = 200
+        if ite.cond.eval(s).valB {
+            fmt.Printf("\n %s", assign1.pretty())
+        }else{
+            fmt.Printf("\n %s", assign2.pretty())            
+        }
+        
+//         Int        
+        fmt.Printf("\n %s", showType(varName.infer(t)))
+    }
+    fmt.Printf("\n\n\n") 
+    
 }
 
+/*
+ * Function for testing the assign statement
+ * A new variable is created via variable() and
+ * then declareted with a value.
+ * The variable is then assigned new values.
+ * If the assignment was successfull the result
+ * of the assignment is printed. Otherwise an info
+ * is printed, that the assignment wasn't possible.
+ */
 func testAssign() {
     s := make(map[string]Val)
 	t := make(map[string]Type)
@@ -912,12 +1140,24 @@ func testAssign() {
         fmt.Printf("\n %s", showVal(varName.eval(s)))
         fmt.Printf("\n %s", showType(varName.infer(t)))
     }else{
-        fmt.Printf("\n Assignment not possible \n")
+        fmt.Printf("\n Assignment not possible: %s \n", newValue.pretty())
     }
     
     fmt.Printf("\n\n\n") 
 
 }
+
+/*
+ * Function for testing the declaration statement.
+ * A variable is created with variable() and
+ * declareted in the next step with the creation
+ * of a declaration struct. The lookup-maps s and t
+ * are updated as well. If the declaration was
+ * successfull in declVar(), the declaration itself
+ * is printed as well as the value and the type
+ * of the new variable. Otherwise an info is printed,
+ * that the declaration was not possible.
+ */
 
 func testDecl() {
     s := make(map[string]Val)
@@ -969,12 +1209,17 @@ func testDecl() {
         fmt.Printf("\n %s", showType(varName.infer(t)))
         fmt.Printf("\n\n\n")    
     }else {
-        fmt.Printf("\n Declaration not possible \n")
+        fmt.Printf("\n Declaration not possible: %s \n", varValue.pretty())
     }
 
     fmt.Printf("\n\n\n")
 }
 
+/*
+ * Creates a expression varName from type Var via the helper function variable()
+ * The value and type of that variable is then printed. Since it's not declared
+ * with any value, there should no value and type in s and t.
+ */
 func testVar() {
     s := make(map[string]Val)
 	t := make(map[string]Type)
@@ -984,7 +1229,11 @@ func testVar() {
     nameString := "testVariable"
     
     varName := variable(nameString)
-	fmt.Printf("\n %s", showVal(varName.eval(s)))
+    
+    // Undefined
+    fmt.Printf("\n %s", showVal(varName.eval(s)))
+    
+    // Illtyped
     fmt.Printf("\n %s", showType(varName.infer(t)))
     
     fmt.Printf("\n\n\n")    
@@ -995,27 +1244,27 @@ func testVar() {
 func main() {
 
 	fmt.Printf("\n")
-	// ex1()
-	//ex2()
-	//ex3()
-// 	testNeg1()
-// 	testNeg2()
-// 	testNeg3()
-// 	testNeg4()
-// 	testLesser1()
-// 	testLesser2()
-// 	testLesser3()
-// 	testEq1()
-// 	testEq2()
-// 	testEq3()
-// 	testimp()
-// 	testError1()
-// 	testError2()
-// 	testError3()
-//     testVar()
-//     testDecl()
-//     testAssign()
-//     testIfThenElse()
+	ex1()
+	ex2()
+	ex3()
+	testNeg1()
+	testNeg2()
+	testNeg3()
+	testNeg4()
+	testLesser1()
+	testLesser2()
+	testLesser3()
+	testEq1()
+	testEq2()
+	testEq3()
+	testimp()
+	testError1()
+	testError2()
+	testError3()
+    testVar()
+    testDecl()
+    testAssign()
+    testIfThenElse()
     testWhile()
 }
 
