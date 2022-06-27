@@ -226,6 +226,12 @@ func (decl Decl) eval(s ValState) {
 
 // Solution eval statements
 
+func (assign Assign) eval(s ValState) {
+    v := assign.rhs.eval(s)
+    x := (string)(assign.lhs)
+    s[x] = v
+}
+
 func (whl While) eval(s ValState) {
 	v := whl.cond.eval(s)
 	if v.flag == ValueBool && v.valB == true {
@@ -782,13 +788,59 @@ func variable(x string) Exp {
     return Var(x)
 }
 
-func declVar(x string, y Exp) *Decl{    
+func declVar(x string, y Exp, s ValState, t TyState) *Decl{    
     declVar := Decl{lhs: x, rhs: y}
-    return &declVar
+    if declVar.check(t){
+        declVar.eval(s)
+        return &declVar
+    }
+    return nil
+    
 }
 
-func assignVar(x string, y Exp) {
+func assignVar(x string, y Exp, s ValState, t TyState) *Assign {
+    assignVar := Assign{lhs: x, rhs: y}
+    if assignVar.check(t) {
+        assignVar.eval(s)
+        return &assignVar
+    } 
+    return nil
     
+}
+
+func testAssign() {
+    s := make(map[string]Val)
+	t := make(map[string]Type)
+	fmt.Print("Test var Assignment!")
+    fmt.Printf("\n ******* \n")
+    
+    nameString := "testVariable"
+    
+    varName := variable(nameString)    
+    varValue := number(2)
+    decl := declVar(varName.pretty(), varValue, s, t)
+    if decl != nil {
+        fmt.Printf("\n %s", decl.pretty())
+        fmt.Printf("\n %s", showVal(varName.eval(s)))
+        fmt.Printf("\n %s", showType(varName.infer(t)))
+    }else{
+        fmt.Printf("\n declaration not possible \n")
+    }
+    
+    fmt.Printf("\n\n\n") 
+    
+    newValue := boolean(true)
+    assign := assignVar(varName.pretty(), newValue, s, t)
+    if assign != nil {
+        fmt.Printf("\n %s", assign.pretty())
+        fmt.Printf("\n %s", showVal(varName.eval(s)))
+        fmt.Printf("\n %s", showType(varName.infer(t)))
+    }else{
+        fmt.Printf("\n Assignment not possible \n")
+    }
+    
+    fmt.Printf("\n\n\n") 
+
 }
 
 func testDecl() {
@@ -798,43 +850,53 @@ func testDecl() {
     fmt.Printf("\n ******* \n")
     
     nameString := "testVariable"
-    
     varName := variable(nameString)    
+    
     varValue := number(2)
-    decl := declVar(varName.pretty(), varValue)
-    decl.eval(s)
-    decl.check(t)
-    fmt.Printf("\n %s", decl.pretty())
-    fmt.Printf("\n %s", showVal(varName.eval(s)))
-    fmt.Printf("\n %s", showType(varName.infer(t)))
-
-    fmt.Printf("\n\n\n")    
+    decl := declVar(varName.pretty(), varValue, s, t)
+    if decl != nil{
+        fmt.Printf("\n %s", decl.pretty())
+        fmt.Printf("\n %s", showVal(varName.eval(s)))
+        fmt.Printf("\n %s", showType(varName.infer(t)))
+    }else {
+        fmt.Printf("\n Declaration not possible \n")
+    }
     
-    varName2 := variable(nameString)    
-    varValue2 := boolean(true)
-    decl2 := declVar(varName2.pretty(), varValue2)
-    decl2.eval(s)
-    decl2.check(t)
-
-    fmt.Printf("\n %s", decl2.pretty())
-    fmt.Printf("\n %s", showVal(varName2.eval(s)))
-    fmt.Printf("\n %s", showType(varName2.infer(t)))
+    fmt.Printf("\n\n\n")
+    varValue = boolean(true)
+    decl = declVar(varName.pretty(), varValue, s, t)
+    if decl != nil{
+        fmt.Printf("\n %s", decl.pretty())
+        fmt.Printf("\n %s", showVal(varName.eval(s)))
+        fmt.Printf("\n %s", showType(varName.infer(t)))   
+    }else {
+        fmt.Printf("\n Declaration not possible \n")
+    }
 
     fmt.Printf("\n\n\n")
-
-    
-    varName3 := variable(nameString)    
-    varValue3 := equal(neg(boolean(true)), less(number(4), number(6)))
-    decl3 := declVar(varName3.pretty(), varValue3)
-    decl3.eval(s)
-    decl3.check(t)
-
-    fmt.Printf("\n %s", decl3.pretty())
-    fmt.Printf("\n %s", showVal(varName3.eval(s)))
-    fmt.Printf("\n %s", showType(varName3.infer(t)))
+    varValue = equal(neg(boolean(true)), less(number(4), number(6)))
+    decl = declVar(varName.pretty(), varValue, s, t)
+    if decl != nil{
+        fmt.Printf("\n %s", decl.pretty())
+        fmt.Printf("\n %s", showVal(varName.eval(s)))
+        fmt.Printf("\n %s", showType(varName.infer(t))) 
+    }else {
+        fmt.Printf("\n Declaration not possible \n")
+    }
 
     fmt.Printf("\n\n\n")
+    varValue = equal(neg(boolean(true)), number(2))
+    decl = declVar(varName.pretty(), varValue, s, t)
+    if decl != nil{
+        fmt.Printf("\n %s", decl.pretty())
+        fmt.Printf("\n %s", showVal(varName.eval(s)))
+        fmt.Printf("\n %s", showType(varName.infer(t)))
+        fmt.Printf("\n\n\n")    
+    }else {
+        fmt.Printf("\n Declaration not possible \n")
+    }
 
+    fmt.Printf("\n\n\n")
 }
 
 func testVar() {
@@ -884,6 +946,7 @@ func main() {
 // 	testError3()
 //     testVar()
     testDecl()
+//     testAssign()
 }
 
 func isVarNameCorrect(s string) bool {
