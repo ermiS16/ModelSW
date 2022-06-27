@@ -190,7 +190,7 @@ func (whl While) pretty() string {
 }
 
 func (prnt Print) pretty() string {
-	return prnt.exp.pretty()
+	return "Print(" + prnt.exp.pretty() + ")"
 }
 
 // eval
@@ -803,29 +803,38 @@ func assignVar(x string, y Exp, s ValState, t TyState) *Assign {
 }
 
 func testWhile() {
-//     s := make(map[string]Val)
-// 	t := make(map[string]Type)
+    s := make(map[string]Val)
+	t := make(map[string]Type)
 	fmt.Print("Test var Assignment!")
     fmt.Printf("\n ******* \n")
     
     max := number(10)
-    varValue := number(100)
+    initNumber := number(0)
+    nameString := "testVariable"
+    varName := variable(nameString)
     
-    condValue := number(0)
-	cond := less(condValue, max)
+    index := declVar(varName.pretty(), initNumber, s, t)
     
-	doStmt := Print{exp: varValue}
+	
+    cond := less(varName, max)
+    
+    prntStmt := Print{exp: varName}
+    assignStmt := assignVar(index.lhs, plus(varName, number(1)), s, t)
+	doStmt := Seq{prntStmt, assignStmt}
     whl := While{cond: cond, doStmt: doStmt}
     
-    fmt.Printf("%s", whl.pretty())
+    fmt.Printf("\n %s\n ", index.pretty())
+    fmt.Printf("\n %s\n", whl.pretty())
 
     for{
-        condValue = add(condValue, number(1))
-        if equal(condValue, max) {
+        whl.eval(s)
+        fmt.Printf("%s\n", showVal(varName.eval(s)))
+               
+        if varName.eval(s) == max.eval(s) {
             break
         }
-        fmt.Printf("%s", condValue.pretty())
     }
+    
     
     fmt.Printf("\n\n\n")     
     
