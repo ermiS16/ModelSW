@@ -125,7 +125,6 @@ type IfThenElse struct { // If-then-else
 	cond     Exp
 	thenStmt Stmt
 	elseStmt Stmt
-    flag bool
 }
 
 type Assign struct { // Variable assignment
@@ -191,7 +190,7 @@ func (whl While) pretty() string {
 }
 
 func (prnt Print) pretty() string {
-	return prnt.pretty()
+	return prnt.exp.pretty()
 }
 
 // eval
@@ -203,15 +202,13 @@ func (stmt Seq) eval(s ValState) {
 
 func (ite IfThenElse) eval(s ValState) {
 	v := ite.cond.eval(s)
-	if v.flag == ValueBool {
+    if v.flag == ValueBool {
 		switch {
 		case v.valB:
 			ite.thenStmt.eval(s)
-            ite.flag = true
-		case !v.valB:
+  		case !v.valB:
 			ite.elseStmt.eval(s)
-            ite.flag = false
-		}
+    }
 
 	} else {
 		fmt.Printf("if-then-else eval fail")
@@ -243,7 +240,7 @@ func (whl While) eval(s ValState) {
 }
 
 func (prnt Print) eval(s ValState) {
-	prnt.exp.eval(s)
+    prnt.exp.eval(s)
 }
 
 // type check
@@ -805,6 +802,35 @@ func assignVar(x string, y Exp, s ValState, t TyState) *Assign {
     
 }
 
+func testWhile() {
+//     s := make(map[string]Val)
+// 	t := make(map[string]Type)
+	fmt.Print("Test var Assignment!")
+    fmt.Printf("\n ******* \n")
+    
+    max := number(10)
+    varValue := number(100)
+    
+    condValue := number(0)
+	cond := less(condValue, max)
+    
+	doStmt := Print{exp: varValue}
+    whl := While{cond: cond, doStmt: doStmt}
+    
+    fmt.Printf("%s", whl.pretty())
+
+    for{
+        condValue = add(condValue, number(1))
+        if equal(condValue, max) {
+            break
+        }
+        fmt.Printf("%s", condValue.pretty())
+    }
+    
+    fmt.Printf("\n\n\n")     
+    
+}
+
 func testIfThenElse() {
     s := make(map[string]Val)
 	t := make(map[string]Type)
@@ -823,23 +849,24 @@ func testIfThenElse() {
     newValue2 := number(200)
     assign2 := assignVar(decl.lhs, newValue2, s, t)
     
-    cond := less(number(200), number(100))
+    cond := less(number(100), number(200))
     thenStmt := assign1
 	elseStmt := assign2
         
-    ite := IfThenElse{cond: cond, thenStmt: thenStmt, elseStmt: elseStmt, flag: true}
+    ite := IfThenElse{cond: cond, thenStmt: thenStmt, elseStmt: elseStmt}
     
     if ite.check(t){
         ite.eval(s)
         fmt.Printf("\n %s", ite.pretty())
-        fmt.Printf("\n %s", ite.flag)
-        if ite.flag == true {
+        
+        if ite.cond.eval(s).valB {
             fmt.Printf("\n %s", assign1.pretty())
         }else{
             fmt.Printf("\n %s", assign2.pretty())            
         }
         fmt.Printf("\n %s", showType(varName.infer(t)))
     }
+    fmt.Printf("\n\n\n")     
 }
 
 func testAssign() {
@@ -986,8 +1013,8 @@ func main() {
 //     testVar()
 //     testDecl()
 //     testAssign()
-    testIfThenElse()
-    
+//     testIfThenElse()
+    testWhile()
 }
 
 func isVarNameCorrect(s string) bool {
